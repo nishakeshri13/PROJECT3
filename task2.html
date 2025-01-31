@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stopwatch</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+  }
+  .stopwatch {
+    margin-top: 50px;
+  }
+  .time {
+    font-size: 3em;
+    margin-bottom: 20px;
+  }
+  .buttons {
+    margin-top: 20px;
+  }
+  button {
+    font-size: 1.2em;
+    margin: 0 5px;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    background-color: #007bff;
+    color: #fff;
+  }
+  button:hover {
+    background-color: #0056b3;
+  }
+</style>
+</head>
+<body>
+<div class="stopwatch">
+  <div class="time">00:00:00</div>
+  <div class="buttons">
+    <button id="startStop" onclick="startStop()">Start</button>
+    <button id="lapReset" onclick="lapReset()">Lap</button>
+  </div>
+  <div id="laps"></div>
+</div>
+<script>
+  let timer;
+  let isRunning = false;
+  let startTime;
+  let lapTimes = [];
+
+  function startStop() {
+    if (isRunning) {
+      clearInterval(timer);
+      document.getElementById('startStop').textContent = 'Start';
+    } else {
+      startTime = Date.now() - (lapTimes.length > 0 ? lapTimes.reduce((acc, curr) => acc + curr, 0) : 0);
+      timer = setInterval(updateTime, 1000);
+      document.getElementById('startStop').textContent = 'Stop';
+    }
+    isRunning = !isRunning;
+  }
+
+  function updateTime() {
+    const elapsedTime = Date.now() - startTime;
+    const formattedTime = formatTime(elapsedTime);
+    document.querySelector('.time').textContent = formattedTime;
+  }
+
+  function formatTime(ms) {
+    const date = new Date(ms);
+    const hours = String(date.getUTCHours()).padStart(2, '0');
+    const minutes = String(date.getUTCMinutes()).padStart(2, '0');
+    const seconds = String(date.getUTCSeconds()).padStart(2, '0');
+    return `${hours}:${minutes}:${seconds}`;
+  }
+
+  function lapReset() {
+    if (isRunning) {
+      const lapTime = Date.now() - startTime - (lapTimes.length > 0 ? lapTimes.reduce((acc, curr) => acc + curr, 0) : 0);
+      lapTimes.push(lapTime);
+      const lap = document.createElement('div');
+      lap.textContent = `Lap ${lapTimes.length}: ${formatTime(lapTime)}`;
+      document.getElementById('laps').appendChild(lap);
+    } else {
+      clearInterval(timer);
+      document.querySelector('.time').textContent = '00:00:00';
+      document.getElementById('startStop').textContent = 'Start';
+      lapTimes = [];
+      document.getElementById('laps').innerHTML = '';
+    }
+  }
+</script>
+</body>
+</html>
